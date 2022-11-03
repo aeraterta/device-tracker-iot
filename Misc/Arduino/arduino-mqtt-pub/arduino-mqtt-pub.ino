@@ -1,5 +1,6 @@
 #include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <Timer.h>
 
 // WiFi
 const char *ssid = "Alfamart Biclatan"; // Enter your WiFi name
@@ -10,7 +11,12 @@ const char *mqtt_broker = "broker.hivemq.com"; // Enter your WiFi or Ethernet IP
 const char *topic = "aeraterta/testing";
 const int mqtt_port = 1883;
 
+char dev_id[] = "tracker_0001";
+
+Timer t;
 WiFiClient espClient;
+int t_count = 0;
+
 PubSubClient client(espClient);
 void setup() 
   {
@@ -47,11 +53,25 @@ void setup()
             delay(2000);
           }
       }
-    
+      
+    t.every(1000, Disp);
     client.publish(topic, "Hello From ESP8266!");                                                               //Publish test data
   }
   
 void loop() 
   {
     client.loop();
+    t.update();
   }
+
+void Disp()
+{
+  t_count++;
+  if (t_count == 5){
+    char data[250];
+    sprintf(data, "{\"id\":\"%s\",\"temperature\":%d}", dev_id, random(10,50));
+    Serial.println(data);
+    client.publish(topic, data); 
+    t_count = 0;
+  }
+}

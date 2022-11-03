@@ -1,9 +1,8 @@
 # python3.6
 
 import random
-
+import time
 from paho.mqtt import client as mqtt_client
-
 
 broker = 'broker.hivemq.com'
 port = 1883
@@ -30,7 +29,10 @@ def connect_mqtt() -> mqtt_client:
 
 def subscribe(client: mqtt_client):
     def on_message(client, userdata, msg):
-        print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic")
+        named_tuple = time.localtime() # get struct_time
+        time_string = time.strftime("%m/%d/%Y, %H:%M:%S", named_tuple)
+        
+        print(f"Received `{msg.payload.decode()}` from `{msg.topic}` topic with timestamp `{time_string}`")
 
     client.subscribe(topic)
     client.on_message = on_message
